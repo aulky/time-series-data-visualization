@@ -1,0 +1,339 @@
+source : data\raw\metro_interstate_traffic_volume.csv
+loaded : 2026-10-31 06:29:33
+
+==============================================================================
+1. SHAPE, DTYPE, MISSING VALUES
+==============================================================================
+rows x columns : 48204 x 9
+memory usage   : 8.95 MiB
+
+                              dtype  non_null  n_missing  pct_missing  n_unique
+holiday                         str        61      48143       99.873        11
+temp                        float64     48204          0        0.000      5843
+rain_1h                     float64     48204          0        0.000       372
+snow_1h                     float64     48204          0        0.000        12
+clouds_all                    int64     48204          0        0.000        60
+weather_main                    str     48204          0        0.000        11
+weather_description             str     48204          0        0.000        38
+date_time            datetime64[us]     48204          0        0.000     40575
+traffic_volume                int64     48204          0        0.000      6704
+
+==============================================================================
+1b. NUMERIC SUMMARY
+==============================================================================
+                  count                        mean                  min                  25%                  50%                  75%                  max         std
+temp            48204.0                   281.20587                  0.0               272.16               282.45              291.806               310.07   13.338232
+rain_1h         48204.0                    0.334264                  0.0                  0.0                  0.0                  0.0               9831.3   44.789133
+snow_1h         48204.0                    0.000222                  0.0                  0.0                  0.0                  0.0                 0.51    0.008168
+clouds_all      48204.0                   49.362231                  0.0                  1.0                 64.0                 90.0                100.0    39.01575
+date_time         48204  2016-01-05 10:46:16.773711  2012-10-02 09:00:00  2014-02-06 11:45:00  2016-06-11 03:30:00  2017-08-11 06:00:00  2018-09-30 23:00:00         NaN
+traffic_volume  48204.0                 3259.818355                  0.0               1193.0               3380.0               4933.0               7280.0  1986.86067
+
+==============================================================================
+1c. CATEGORICAL VALUE COUNTS
+==============================================================================
+
+-- holiday --
+holiday
+NaN                          48143
+Labor Day                        7
+Thanksgiving Day                 6
+Christmas Day                    6
+New Years Day                    6
+Martin Luther King Jr Day        6
+Columbus Day                     5
+Veterans Day                     5
+Washingtons Birthday             5
+Memorial Day                     5
+Independence Day                 5
+State Fair                       5
+
+-- weather_main --
+weather_main
+Clouds          15164
+Clear           13391
+Mist             5950
+Rain             5672
+Snow             2876
+Drizzle          1821
+Haze             1360
+Thunderstorm     1034
+Fog               912
+Smoke              20
+Squall              4
+
+-- weather_description (top 15 of 38) --
+weather_description
+sky is clear               11665
+mist                        5950
+overcast clouds             5081
+broken clouds               4666
+scattered clouds            3461
+light rain                  3372
+few clouds                  1956
+light snow                  1946
+Sky is Clear                1726
+moderate rain               1664
+haze                        1360
+light intensity drizzle     1100
+fog                          912
+proximity thunderstorm       673
+drizzle                      651
+
+holiday: NaN (empty cell) = 48143, named holidays = 61
+holiday labels present:
+holiday
+Labor Day                    7
+Thanksgiving Day             6
+Christmas Day                6
+New Years Day                6
+Martin Luther King Jr Day    6
+Columbus Day                 5
+Veterans Day                 5
+Washingtons Birthday         5
+Memorial Day                 5
+Independence Day             5
+State Fair                   5
+
+rows carrying a holiday label  : 61 (53 distinct dates)
+time-of-day of those rows      : {0: np.int64(61)}
+IMPORTANT: the holiday label only marks the 00:00 record of a holiday; the other 23 hours of that day keep an empty holiday cell. Row-level flags therefore undercount holidays.
+
+==============================================================================
+2. DUPLICATE ROWS VS DUPLICATE TIMESTAMPS
+==============================================================================
+fully duplicated rows          : 17
+timestamps occurring >1 time   : 5445
+rows involved                  : 13074
+date range of duplicates       : 2012-10-10 07:00:00 .. 2018-09-30 15:00:00
+duplicate timestamps                     : 5445
+  - traffic_volume identical in group    : 5445
+  - traffic_volume DIFFERENT in group    : 0
+  - every support column identical       : 15
+  - some support column differs          : 5430
+      weather_main/description differs   : 5386
+      numeric weather cols differ        : 79
+      holiday label differs              : 0
+max spread of traffic_volume inside a duplicate group: 0
+numeric spread inside groups: temp max 20.43 K, rain_1h max 0.76 mm, snow_1h max 0.00 mm, clouds_all max 75 pp
+largest numeric disagreement at 2014-01-17 06:00:00:
+          date_time    temp  clouds_all weather_main  traffic_volume
+2014-01-17 06:00:00 276.793          64       Clouds            5441
+2014-01-17 06:00:00 256.360          40       Clouds            5441
+example of differing weather label at 2012-10-10 07:00:00:
+          date_time weather_main     weather_description  traffic_volume
+2012-10-10 07:00:00         Rain              light rain            6793
+2012-10-10 07:00:00      Drizzle light intensity drizzle            6793
+=> traffic_volume is always identical. Two kinds of support-column disagreement exist:
+   (a) synonym labels for the same weather (Rain/light rain vs Drizzle/light intensity drizzle);
+   (b) disjoint hourly weather readings merged onto one timestamp (e.g. 276.79 K vs 256.36 K),
+       i.e. the same hour appears in more than one source weather file. Only the first row is
+       kept by keep-first, so support columns on those rows are approximate.
+
+group size distribution (records per duplicated timestamp):
+traffic_volume
+2    3617
+3    1513
+4     276
+5      37
+6       2
+
+hour-of-day distribution of duplicated timestamps:
+0     232
+1     246
+2     242
+3     267
+4     283
+5     276
+6     287
+7     300
+8     281
+9     259
+10    255
+11    205
+12    192
+13    166
+14    190
+15    181
+16    201
+17    194
+18    204
+19    195
+20    188
+21    192
+22    194
+23    215
+
+full duplicate rows written to reports\duplicate_timestamp_review.csv
+
+==============================================================================
+3. TEMPORAL RANGE AND TIMESTAMP GAPS
+==============================================================================
+min date_time : 2012-10-02 09:00:00
+max date_time : 2018-09-30 23:00:00
+span          : 2189 days 14:00:00
+expected hours in [2012-10-02 09:00, 2018-09-30 23:00]: 52551
+observed unique timestamps                          : 40575
+missing hourly timestamps                           : 11976
+missing pct                                         : 22.79%
+step sizes (hours) observed : {Timedelta('0 days 01:00:00'): 37986, Timedelta('0 days 02:00:00'): 2192, Timedelta('0 days 03:00:00'): 201, Timedelta('0 days 04:00:00'): 59, Timedelta('0 days 05:00:00'): 33, Timedelta('0 days 06:00:00'): 17, Timedelta('0 days 07:00:00'): 10, Timedelta('0 days 08:00:00'): 13, Timedelta('0 days 09:00:00'): 12, Timedelta('0 days 10:00:00'): 13, Timedelta('0 days 11:00:00'): 4, Timedelta('0 days 12:00:00'): 2, Timedelta('0 days 13:00:00'): 3, Timedelta('0 days 14:00:00'): 3, Timedelta('0 days 15:00:00'): 2, Timedelta('0 days 17:00:00'): 1, Timedelta('0 days 18:00:00'): 1, Timedelta('0 days 21:00:00'): 2, Timedelta('0 days 22:00:00'): 4, Timedelta('1 days 00:00:00'): 4, Timedelta('1 days 01:00:00'): 1, Timedelta('1 days 06:00:00'): 2, Timedelta('1 days 09:00:00'): 1, Timedelta('1 days 10:00:00'): 1, Timedelta('1 days 23:00:00'): 1, Timedelta('2 days 17:00:00'): 1, Timedelta('3 days 21:00:00'): 1, Timedelta('4 days 21:00:00'): 1, Timedelta('4 days 22:00:00'): 1, Timedelta('10 days 03:00:00'): 1, Timedelta('307 days 19:00:00'): 1}
+NOTE: zero NaN in the value columns does NOT imply a complete hourly series.
+
+number of contiguous gaps : 2588
+largest gap               : 7386 h (2014-08-08 02:00:00 .. 2015-06-11 19:00:00)
+
+top 15 gaps:
+          gap_start             gap_end  n_missing_hours
+2014-08-08 02:00:00 2015-06-11 19:00:00             7386
+2013-10-27 02:00:00 2013-11-06 03:00:00              242
+2015-06-14 21:00:00 2015-06-19 17:00:00              117
+2014-04-29 09:00:00 2014-05-04 04:00:00              116
+2015-10-23 12:00:00 2015-10-27 07:00:00               92
+2014-07-27 17:00:00 2014-07-30 08:00:00               64
+2013-08-31 01:00:00 2013-09-01 22:00:00               46
+2015-06-22 19:00:00 2015-06-24 03:00:00               33
+2014-08-02 03:00:00 2014-08-03 10:00:00               32
+2013-09-03 03:00:00 2013-09-04 07:00:00               29
+2015-06-20 19:00:00 2015-06-21 23:00:00               29
+2013-01-29 01:00:00 2013-01-30 00:00:00               24
+2015-06-12 22:00:00 2015-06-13 20:00:00               23
+2014-06-16 10:00:00 2014-06-17 08:00:00               23
+2015-06-19 19:00:00 2015-06-20 17:00:00               23
+gap length distribution (hours -> count):
+n_missing_hours
+1       2192
+2        201
+3         59
+4         33
+5         17
+6         10
+7         13
+8         12
+9         13
+10         4
+11         2
+12         3
+13         3
+14         2
+16         1
+17         1
+20         2
+21         4
+23         4
+24         1
+29         2
+32         1
+33         1
+46         1
+64         1
+92         1
+116        1
+117        1
+242        1
+7386       1
+
+all gaps written to reports\timestamp_gaps.csv
+
+==============================================================================
+3b. TRAFFIC_VOLUME == 0 ROWS (suspected station downtime)
+==============================================================================
+count      : 2
+min date   : 2016-07-23 18:00:00
+max date   : 2016-07-23 23:00:00
+temp/clouds on zero rows (mean): {'temp': 296.28999999999996, 'clouds_all': 65.0}
+weather_main on zero rows:
+weather_main
+Rain    1
+Haze    1
+
+==============================================================================
+4. OBSERVATIONS PER YEAR AND PER DAY
+==============================================================================
+           count  nunique  hours_in_year_observed_window  completeness_pct
+date_time                                                                 
+2012        2559     2103                           2175             96.69
+2013        8573     7294                           8760             83.26
+2014        4839     4501                           8760             51.38
+2015        4373     3593                           8760             41.02
+2016        9306     7838                           8784             89.23
+2017       10605     8713                           8760             99.46
+2018        7949     6533                           6552             99.71
+calendar days covered        : 1860
+complete 24h days            : 1213
+partial days (excluding the 2 clipped boundary days): 645
+days-per-observation-count distribution (all days):
+n_obs
+1        9
+2        7
+3        7
+4        5
+5        2
+6        8
+7        1
+8        6
+9        7
+10       5
+11      11
+12      26
+13      52
+14      37
+15      30
+16      27
+17      31
+18      25
+19      25
+20      31
+21      62
+22      70
+23     162
+24    1214
+the clipped boundary days:
+      date  n_obs  mean_volume  is_partial_window
+2012-10-02     15  4219.266667               True
+2018-09-30     24  2645.576923               True
+
+==============================================================================
+5. OUTLIER REVIEW (no rows removed)
+==============================================================================
+Q1=1193 Q3=4933 IQR=3740 fences=(-4417, 10543)
+IQR outliers : 0 rows (0.00%)
+Lower fence is negative -> traffic_volume has no low outliers.
+Upper fence 10543 exceeds the observed maximum 7280 -> no IQR outliers on either side; the distribution is right-skewed, not contaminated.
+After excluding the 0-volume rows: upper fence 10543, rows above it 0
+Highest 5 traffic_volume values:
+          date_time  traffic_volume weather_main
+2017-03-09 16:00:00            7280       Clouds
+2016-04-21 07:00:00            7260         Mist
+2016-04-21 07:00:00            7260         Rain
+2016-04-22 07:00:00            7241        Clear
+2013-04-30 07:00:00            7217        Clear
+
+==============================================================================
+5b. SENSOR SENTINELS / IMPOSSIBLE PHYSICAL VALUES (flagged, kept)
+==============================================================================
+temp <= 0 K (below absolute zero, physically impossible): 10 rows
+  dates: [datetime.date(2014, 1, 31), datetime.date(2014, 2, 2)]
+rain_1h > 200 mm/h (US hourly record is ~330 mm; 200 mm is a sentinel, not rain): 1 rows
+          date_time  rain_1h weather_main
+2016-07-11 17:00:00   9831.3         Rain
+weather_description labels only differing by capitalisation: ['SQUALLS', 'Sky is Clear']
+  rows affected: 1730 -> normalised to lower case
+These are flagged with is_temp_error / is_rain_error / and not imputed or dropped.
+
+==============================================================================
+6. PREPROCESSING STEPS APPLIED
+==============================================================================
+1. drop duplicate timestamps (values verified identical): -7629 rows
+2. keep temp (K) as temp_k, add temp_c = temp_k - 273.15; flag impossible values (is_temp_error, is_rain_error) and add temp_c_clean (NaN on flagged rows, no imputation); lower-case weather_description
+3. add calendar features: holiday (NaN -> 'None'), date, hour, day_of_week, day_of_week_num, is_weekend, month, year, is_holiday, holiday_date
+   is_holiday marks only the labelled 00:00 row; holiday_date spreads the label over all 24 hours of that date for day-level comparisons
+4. flag traffic_volume == 0 as is_sensor_zero (2 rows), values NOT imputed
+5. gap_hours = hours elapsed since previous observation (1 = contiguous)
+
+final columns : ['holiday', 'temp_k', 'rain_1h', 'snow_1h', 'clouds_all', 'weather_main', 'weather_description', 'date_time', 'traffic_volume', 'temp_c', 'is_temp_error', 'is_rain_error', 'temp_c_clean', 'date', 'hour', 'day_of_week', 'day_of_week_num', 'is_weekend', 'month', 'year', 'is_holiday', 'holiday_date', 'is_sensor_zero', 'gap_hours']
+final shape   : (40575, 24)
+missing cells : 39382
+
+zero rows by year (preprocessing evidence): {2016: 2}
+
+written: data\processed\metro_interstate_traffic_model.csv
