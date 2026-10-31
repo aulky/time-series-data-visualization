@@ -11,8 +11,10 @@ venv/
 .ipynb_checkpoints/
 *.nbconvert.ipynb
 
-# Microsoft Word lock files (~$...)
+# Microsoft Word lock files and temp saves (~$... , ~WRL*.tmp)
 ~$*
+~WRL*.tmp
+*.tmp
 
 # OS / editor
 .DS_Store
