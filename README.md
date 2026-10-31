@@ -55,7 +55,8 @@ Manajemen dependensi juga tersedia melalui `pyproject.toml` + `uv.lock` (proyek 
 │   └── processed/
 │       └── metro_interstate_traffic_model.csv       # 40.575 × 24, hasil preprocessing
 ├── notebooks/
-│   └── metro_interstate_traffic_analysis.ipynb      # notebook utama (sudah dieksekusi, ada output & grafik)
+│   ├── metro_interstate_traffic_analysis.ipynb          # versi lengkap: kode + pembahasan & interpretasi
+│   └── metro_interstate_traffic_submission_colab.ipynb  # versi submission: point headings murni, native Google Colab
 ├── reports/
 │   ├── quality_report.txt                           # laporan pemeriksaan kualitas data
 │   ├── duplicate_timestamp_review.csv               # seluruh baris bertimestamp ganda
@@ -91,6 +92,21 @@ source .venv/bin/activate          # Windows Git Bash: source .venv/Scripts/acti
                                    # Windows PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
+
+## Pilihan Notebook
+
+Repository ini menyediakan dua varian notebook sesuai kebutuhan:
+
+1. **`metro_interstate_traffic_analysis.ipynb` (Versi Analisis Lengkap)**
+   - Berisi seluruh kode, output eksekusi, serta teks pembahasan naratif dan interpretasi detail di bawah setiap visualisasi.
+   - Digunakan untuk membaca laporan analisis mendalam.
+
+2. **`metro_interstate_traffic_submission_colab.ipynb` (Versi Pengumpulan / Google Colab Native)**
+   - Khusus pengumpulan tugas: teks pembahasan naratif ditiadakan, diganti murni **point heading** (mis. `## 8. Line Plot`, `## 12. Trend Analysis`, dst.).
+   - Dilengkapi tombol **Open in Colab** di awal notebook.
+   - Mengunduh dataset otomatis jika dijalankan di Google Colab tanpa clone repository.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/aulky/time-series-data-visualization/blob/main/notebooks/metro_interstate_traffic_submission_colab.ipynb)
 
 ## Cara Menjalankan Notebook
 
